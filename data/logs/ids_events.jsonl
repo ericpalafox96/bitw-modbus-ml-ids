@@ -1,0 +1,13 @@
+{
+  "id": "uuid",
+  "ts": 1710100000.123,
+  "window_seconds": 0.5,
+  "prediction": "normal|timing_attack|replay_attack|command_injection",
+  "confidence": 0.0,
+  "policy_action": "forward|alert|terminate_session|drop_packet",
+  "src_ip": "x.x.x.x",
+  "dst_ip": "x.x.x.x",
+  "src_port": 12345,
+  "dst_port": 502,
+  "features": { "feature_name": 0.0 }
+}
