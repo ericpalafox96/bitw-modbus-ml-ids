@@ -4,3 +4,8 @@ scikit-learn
 scapy
 pymodbus
 matplotlib
+fastapi
+uvicorn
+jinja2
+websockets 
+wsproto

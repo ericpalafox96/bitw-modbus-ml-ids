@@ -2,12 +2,26 @@
   "id": "uuid",
   "ts": 1710100000.123,
   "window_seconds": 0.5,
-  "prediction": "normal|timing_attack|replay_attack|command_injection",
-  "confidence": 0.0,
-  "policy_action": "forward|alert|terminate_session|drop_packet",
-  "src_ip": "x.x.x.x",
-  "dst_ip": "x.x.x.x",
-  "src_port": 12345,
+  "prediction": "replay_attack",
+  "confidence": 0.91,
+  "severity": "high",
+  "policy_action": "terminate_session",
+  "status": "new",
+  "protocol": "modbus_tcp",
+  "src_ip": "xx.xx.xx.xx",
+  "dst_ip": "xx.xx.xx.xx",
+  "src_port": 51012,
   "dst_port": 502,
-  "features": { "feature_name": 0.0 }
+  "features": {
+    "packet_count": 42,
+    "bytes_total": 18560,
+    "iat_mean": 0.0042,
+    "iat_std": 0.0011,
+    "packet_size_mean": 442.9
+  },
+  "model": {
+    "name": "rf_4class.pkl",
+    "version": "v1"
+  },
+  "recommended_response": "Review repeated Modbus exchanges and verify session legitimacy before restoring trust."
 }

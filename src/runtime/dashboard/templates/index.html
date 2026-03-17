@@ -11,131 +11,189 @@
   <body>
     <header class="topbar">
       <div class="brand">
-        <div class="title">BITW Modbus/TCP IDS</div>
-        <div class="subtitle">Real-time attack logging • Random Forest inference • 0.5s windows</div>
+        <div class="title">BITW Modbus/TCP IDS Operator Console</div>
+        <div class="subtitle">Live monitoring • Traffic analysis • Investigation workflow • Operator response</div>
       </div>
 
       <div class="status">
         <div class="pill" id="pill-health">Offline</div>
         <div class="pill subtle" id="pill-log">Log: —</div>
+        <div class="pill subtle" id="pill-last">Last event: —</div>
       </div>
     </header>
 
-    <main class="grid">
-      <section class="card kpis">
-        <div class="card-title">Operational Summary (Last 1 minute)</div>
+    <main class="layout">
+      <section class="left-panel">
+        <section class="card kpis">
+          <div class="card-title">Operational Summary</div>
+          <div class="kpi-row">
+            <div class="kpi">
+              <div class="kpi-label">Events (1 min)</div>
+              <div class="kpi-value" id="kpi-events">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Attack Rate</div>
+              <div class="kpi-value" id="kpi-attackrate">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Top Class</div>
+              <div class="kpi-value" id="kpi-topclass">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Critical Alerts</div>
+              <div class="kpi-value" id="kpi-critical">—</div>
+            </div>
+          </div>
 
-        <div class="kpi-row">
-          <div class="kpi">
-            <div class="kpi-label">Events</div>
-            <div class="kpi-value" id="kpi-events">—</div>
+          <div class="mini-legend">
+            <span class="tag normal">normal</span>
+            <span class="tag timing">timing_attack</span>
+            <span class="tag replay">replay_attack</span>
+            <span class="tag inject">command_injection</span>
           </div>
-          <div class="kpi">
-            <div class="kpi-label">Attack Rate</div>
-            <div class="kpi-value" id="kpi-attackrate">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Top Class</div>
-            <div class="kpi-value" id="kpi-topclass">—</div>
-          </div>
-        </div>
+        </section>
 
-        <div class="mini-legend">
-          <span class="tag normal">normal</span>
-          <span class="tag timing">timing_attack</span>
-          <span class="tag replay">replay_attack</span>
-          <span class="tag inject">command_injection</span>
-        </div>
+        <section class="card chart">
+          <div class="card-title">Detections Over Time</div>
+          <div class="chart-wrap">
+            <canvas id="chart"></canvas>
+          </div>
+        </section>
+
+        <section class="card report-card">
+          <div class="card-title">Report Snapshot (Last 15 min)</div>
+          <div class="report-grid">
+            <div class="report-item">
+              <div class="report-label">Average Confidence</div>
+              <div class="report-value" id="report-confidence">—</div>
+            </div>
+            <div class="report-item">
+              <div class="report-label">Most Recent Prediction</div>
+              <div class="report-value" id="report-recent">—</div>
+            </div>
+          </div>
+          <div class="report-subtitle">Top Source IPs</div>
+          <div id="report-sources" class="report-sources empty-text">No data available.</div>
+        </section>
+
+        <section class="card table-card">
+          <div class="table-head">
+            <div class="card-title">Traffic / Event Explorer</div>
+
+            <div class="filters">
+              <input id="filter-search" type="text" placeholder="Search IP, action, class..." />
+
+              <select id="filter-class">
+                <option value="">All classes</option>
+                <option value="normal">normal</option>
+                <option value="timing_attack">timing_attack</option>
+                <option value="replay_attack">replay_attack</option>
+                <option value="command_injection">command_injection</option>
+              </select>
+
+              <select id="filter-conf">
+                <option value="0">Min conf: 0.0</option>
+                <option value="0.7">Min conf: 0.7</option>
+                <option value="0.8">Min conf: 0.8</option>
+                <option value="0.9">Min conf: 0.9</option>
+              </select>
+
+              <select id="filter-since">
+                <option value="">Time: all</option>
+                <option value="60">Last 1 min</option>
+                <option value="300">Last 5 min</option>
+                <option value="900">Last 15 min</option>
+              </select>
+
+              <button id="btn-refresh" class="btn">Refresh</button>
+              <button id="btn-export" class="btn">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Class</th>
+                  <th>Severity</th>
+                  <th>Conf</th>
+                  <th>Action</th>
+                  <th>Status</th>
+                  <th>Flow</th>
+                </tr>
+              </thead>
+              <tbody id="events-body"></tbody>
+            </table>
+          </div>
+
+          <div id="empty-state" class="empty-state hidden">
+            <div class="empty-title">No matching events</div>
+            <div class="empty-text">Try adjusting filters, or wait for the runtime to begin writing IDS events.</div>
+          </div>
+        </section>
       </section>
 
-      <section class="card chart">
-        <div class="card-title">Detections Over Time (Last 10 minutes)</div>
-        <div class="chart-wrap">
-          <canvas id="chart"></canvas>
-        </div>
-      </section>
-
-      <section class="card table">
-        <div class="table-head">
-          <div class="card-title">Event Log</div>
-
-          <div class="filters">
-            <select id="filter-class">
-              <option value="">All classes</option>
-              <option value="normal">normal</option>
-              <option value="timing_attack">timing_attack</option>
-              <option value="replay_attack">replay_attack</option>
-              <option value="command_injection">command_injection</option>
-            </select>
-
-            <select id="filter-conf">
-              <option value="0">Min conf: 0.0</option>
-              <option value="0.7">Min conf: 0.7</option>
-              <option value="0.8">Min conf: 0.8</option>
-              <option value="0.9">Min conf: 0.9</option>
-            </select>
-
-            <select id="filter-since">
-              <option value="">Time: all</option>
-              <option value="60">Last 1 min</option>
-              <option value="300">Last 5 min</option>
-              <option value="900">Last 15 min</option>
-            </select>
-
-            <button id="btn-refresh" class="btn">Refresh</button>
+      <aside class="drawer" id="drawer">
+        <div class="drawer-head">
+          <div>
+            <div class="drawer-title">Event Investigation</div>
+            <div class="drawer-sub" id="drawer-sub">—</div>
           </div>
+          <button class="btn ghost" id="drawer-close">Close</button>
         </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Class</th>
-                <th>Conf</th>
-                <th>Action</th>
-                <th>Flow</th>
-              </tr>
-            </thead>
-            <tbody id="events-body"></tbody>
-          </table>
+        <div class="drawer-body">
+          <div class="detail-grid">
+            <div class="detail">
+              <div class="detail-label">Prediction</div>
+              <div class="detail-value" id="d-class">—</div>
+            </div>
+            <div class="detail">
+              <div class="detail-label">Severity</div>
+              <div class="detail-value" id="d-severity">—</div>
+            </div>
+            <div class="detail">
+              <div class="detail-label">Confidence</div>
+              <div class="detail-value" id="d-conf">—</div>
+            </div>
+            <div class="detail">
+              <div class="detail-label">Policy Action</div>
+              <div class="detail-value" id="d-action">—</div>
+            </div>
+            <div class="detail">
+              <div class="detail-label">Protocol</div>
+              <div class="detail-value" id="d-protocol">—</div>
+            </div>
+            <div class="detail">
+              <div class="detail-label">Model</div>
+              <div class="detail-value" id="d-model">—</div>
+            </div>
+          </div>
+
+          <div class="section-title">Recommended Operator Response</div>
+          <div class="response-box" id="d-response">—</div>
+
+          <div class="section-title">User Response / Investigation Status</div>
+          <div class="action-row">
+            <button class="btn action-btn" id="btn-ack">Acknowledge</button>
+            <button class="btn action-btn" id="btn-investigating">Investigating</button>
+            <button class="btn action-btn" id="btn-resolved">Resolved</button>
+          </div>
+
+          <div class="section-title">Analyst Note</div>
+          <textarea id="analyst-note" placeholder="Enter analyst observation, operator response, or incident follow-up..."></textarea>
+
+          <div class="action-row">
+            <button class="btn" id="btn-save-note">Save Note (local)</button>
+            <span id="note-status" class="note-status">No note saved.</span>
+          </div>
+
+          <div class="section-title">Top Feature Values (Window)</div>
+          <div class="feat-list" id="feat-list"></div>
         </div>
-      </section>
+      </aside>
     </main>
-
-    <aside class="drawer" id="drawer">
-      <div class="drawer-head">
-        <div>
-          <div class="drawer-title">Event Detail</div>
-          <div class="drawer-sub" id="drawer-sub">—</div>
-        </div>
-        <button class="btn ghost" id="drawer-close">Close</button>
-      </div>
-
-      <div class="drawer-body">
-        <div class="detail-grid">
-          <div class="detail">
-            <div class="detail-label">Class</div>
-            <div class="detail-value" id="d-class">—</div>
-          </div>
-          <div class="detail">
-            <div class="detail-label">Confidence</div>
-            <div class="detail-value" id="d-conf">—</div>
-          </div>
-          <div class="detail">
-            <div class="detail-label">Policy Action</div>
-            <div class="detail-value" id="d-action">—</div>
-          </div>
-          <div class="detail">
-            <div class="detail-label">Model</div>
-            <div class="detail-value" id="d-model">—</div>
-          </div>
-        </div>
-
-        <div class="section-title">Top Feature Values (Window)</div>
-        <div class="feat-list" id="feat-list"></div>
-      </div>
-    </aside>
 
     <script src="/static/dashboard.js"></script>
   </body>
