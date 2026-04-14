@@ -23,6 +23,8 @@ RESPONSE_MAP = {
     "command_injection": "Treat as critical. Validate command source, inspect recent control traffic, and verify operator authenticity.",
 }
 
+JETSON_IP = "192.168.50.5"
+
 
 def log_event(
     prediction: str,
@@ -54,6 +56,7 @@ def log_event(
         "protocol": protocol,
         "src_ip": src_ip,
         "dst_ip": dst_ip,
+        "sensor_ip": JETSON_IP,
         "src_port": src_port,
         "dst_port": dst_port,
         "features": features,
@@ -66,5 +69,6 @@ def log_event(
 
     with open(LOG_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
+        f.flush()
 
     return event

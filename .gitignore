@@ -8,10 +8,6 @@ data/pcaps/
 *.pcap
 *.pcapng
 
-# Saved models (optional: ignore if you don't want .pkl in repo)
-data/models/
-*.pkl
-
 # OS / editor
 .DS_Store
 Thumbs.db
@@ -22,3 +18,9 @@ Thumbs.db
 env/
 venv/
 .venv/
+
+# Logs
+data/logs/
+
+# Offline packages
+offline_pkgs/
