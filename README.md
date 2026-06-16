@@ -1,4 +1,5 @@
 # Senior Project — BITW Modbus/TCP IDS (Jetson Orin Nano)
+> ⚡ Real-time ML-based intrusion detection system for industrial Modbus/TCP traffic deployed inline using a Jetson Orin Nano.
 
 A bump-in-the-wire (BITW) intrusion detection system for Modbus/TCP traffic.
 
@@ -20,6 +21,114 @@ The goal of this project is to design and deploy an inline ML-based intrusion de
 - Command injection attacks
 
 All traffic must pass through the Jetson BITW device before reaching the DER.
+
+---
+## ⚡ Live System Demo (End-to-End)
+
+The system has been validated with a full real-time pipeline:
+
+    Modbus Traffic → Feature Extraction → ML Inference → Event Logging → Dashboard
+
+- Replay attacks are detected in real-time  
+- Events are logged to `ids_events.jsonl`  
+- Dashboard updates live with:
+  - predictions
+  - confidence scores
+  - source/destination IPs
+  - recommended actions  
+
+### Example Detection Output
+
+- Class: `replay_attack`  
+- Severity: `high`  
+- Confidence: ~0.6–0.8  
+- Flow: `192.168.50.10 → 192.168.50.20:502`  
+
+### Observed Behavior
+
+- Attack rate reached 100% during replay attack testing  
+- Top class correctly identified as `replay_attack`  
+- Continuous real-time detection stream observed  
+
+---
+## 🖥️ Local Execution (Laptop A)
+
+### 1️⃣ Start Dashboard
+
+    set PYTHONPATH=src && python -m uvicorn runtime.dashboard.app:app --reload
+
+Open in browser:
+
+    http://127.0.0.1:8000
+
+---
+
+### 2️⃣ Start Inference Engine
+
+    set PYTHONPATH=src && python -m runtime.inference_engine --iface Ethernet --model data\models\rf_4class.pkl
+
+---
+
+### 3️⃣ Generate Traffic
+
+Normal traffic:
+
+    python src/controller_client.py
+
+Replay attack:
+
+    python src/modbus_replay.py
+
+---
+
+### Expected Behavior
+
+- Dashboard updates in real-time  
+- Events appear in table and charts  
+- Attack types are classified correctly  
+- Replay attack events show:
+  - high severity  
+  - alert action  
+
+---
+
+## 🧠 Feature Set (Model Input)
+
+The model uses the following features:
+
+- packet_count  
+- bytes_total  
+- packet_size_mean  
+- packet_size_std  
+- iat_mean  
+- iat_std  
+- dup_payload_ratio  
+- write_ratio  
+- unique_write_regs  
+
+These features are extracted from 0.5-second sliding windows of Modbus traffic.
+
+---
+
+## 🧪 Detection Pipeline
+
+1. Capture packets (Scapy)  
+2. Aggregate into 0.5-second windows  
+3. Extract features  
+4. Run Random Forest model  
+5. Log event  
+6. Dashboard consumes logs in real-time  
+
+---
+
+## 🚨 Detection Classes
+
+| Class               | Description |
+|--------------------|------------|
+| normal             | Baseline Modbus behavior |
+| timing_attack      | Abnormal polling frequency |
+| replay_attack      | Repeated identical requests |
+| command_injection  | Unauthorized control commands |
 
 ---
 ## High-Level Architecture
@@ -142,7 +251,7 @@ python src/features/window_sweep.py
 ```
 This tests multiple window sizes and selects the optimal value.
 
-Final selected window size: 0.5 seconds```
+Final selected window size: 0.5 seconds
 
 ---
 ## 4️⃣ Train Multi-Class Model

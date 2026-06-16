@@ -21,6 +21,25 @@ venv/
 
 # Logs
 data/logs/
+*.log
 
 # Offline packages
 offline_pkgs/
+
+# Python wheel packages
+*.whl
+
+# Model artifacts
+*.pkl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.*
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
